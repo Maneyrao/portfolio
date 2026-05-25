@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CV Thiago Maneyro</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --text-main: #1f2937;
+      --text-muted: #4b5563;
+      --accent: #2563eb;
+      --border: #e5e7eb;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      color: var(--text-main);
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+      background-color: #fff;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* Header & Contact */
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin: 0 0 0.5rem 0;
+      color: #111827;
+      line-height: 1.2;
+    }
+
+    .title {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .contact-info {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .contact-info span::after {
+      content: "•";
+      margin-left: 1rem;
+      color: #d1d5db;
+    }
+    
+    .contact-info span:last-child::after {
+      content: "";
+    }
+
+    /* Sections */
+    section {
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #111827;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .summary-text {
+      font-size: 0.95rem;
+      text-align: justify;
+    }
+
+    /* Skills */
+    .skills-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .skills-list li {
+      margin-bottom: 0.25rem;
+    }
+
+    /* Experience */
+    .job {
+      margin-bottom: 1.5rem;
+    }
+
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.2rem;
+    }
+
+    .job-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .job-date {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .company {
+      font-weight: 500;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .project {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .project-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    ul.achievements {
+      padding-left: 1.5rem;
+      margin-top: 0.2rem;
+      font-size: 0.95rem;
+    }
+
+    ul.achievements li {
+      margin-bottom: 0.3rem;
+    }
+
+    /* Education & Languages */
+    .edu-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Print Styles to ensure perfect PDF export */
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+        max-width: 100%;
+      }
+      
+      a {
+        color: var(--text-main);
+        text-decoration: none;
+      }
+
+      h2 {
+        border-bottom: 1px solid #000;
+      }
+      
+      @page {
+        margin: 1.5cm;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Thiago Maneyro</h1>
+    <div class="title">Full-Stack Software Developer | AI Integrations</div>
+    <div class="contact-info">
+      <span>Buenos Aires, Argentina</span>
+      <span><a href="mailto:tmaneyro@gmail.com">tmaneyro@gmail.com</a></span>
+      <span><a href="https://linkedin.com/in/thiago-maneyro-b7b183215">LinkedIn</a></span>
+      <span><a href="https://github.com/Maneyrao">GitHub</a></span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <p class="summary-text">
+      Proactive and results-oriented Full-Stack Developer specialized in building scalable web applications, business dashboards, and integrating AI solutions to automate operations. Demonstrated ability to deliver end-to-end products using Next.js, React, FastAPI, and PostgreSQL. Experienced in replacing manual processes with robust software architectures to drive business efficiency.
+    </p>
+  </section>
+
+  <section>
+    <h2>Technical Skills</h2>
+    <ul class="skills-list">
+      <li><strong>Languages:</strong> JavaScript, TypeScript, Python, SQL, HTML/CSS</li>
+      <li><strong>Frontend:</strong> React, Next.js, TailwindCSS, Vanilla CSS</li>
+      <li><strong>Backend:</strong> Node.js, FastAPI, Prisma, SQLAlchemy</li>
+      <li><strong>Databases & Cloud:</strong> PostgreSQL, Supabase, Vercel, Railway</li>
+      <li><strong>Other Tools & APIs:</strong> Claude API, Git, RESTful APIs, System Architecture</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Professional Experience</h2>
+    
+    <div class="job">
+      <div class="job-header">
+        <div class="job-title">Full-Stack Developer / Consultant</div>
+        <div class="job-date">October 2024 - Present</div>
+      </div>
+      <div class="company">Freelance / Independent</div>
+      
+      <div class="project">
+        <div class="project-title">▪ Student Management System (Language School)</div>
+        <ul class="achievements">
+          <li>Engineered a full-stack dashboard utilizing FastAPI, React, PostgreSQL, and Supabase, fully replacing legacy spreadsheet operations.</li>
+          <li>Implemented core features including enrollment tracking, group management, payment processing, and teacher scheduling.</li>
+          <li>Integrated automated WhatsApp reminders to decrease no-show rates and enhance student engagement.</li>
+          <li>Deployed infrastructure using Railway and Vercel for high availability.</li>
+        </ul>
+      </div>
+
+      <div class="project">
+        <div class="project-title">▪ AI Sales Agent & CRM (Language School)</div>
+        <ul class="achievements">
+          <li>Developed and deployed an autonomous AI-driven sales agent using the Claude API integrated with WhatsApp and Instagram.</li>
+          <li>Automated the entire enrollment pipeline: answering inquiries, qualifying leads, assessing schedules, recommending courses, and finalizing registrations with zero human intervention.</li>
+          <li>Built follow-up sequences for cold leads, increasing overall conversion rates and optimizing CRM workflows.</li>
+        </ul>
+      </div>
+
+      <div class="project">
+        <div class="project-title">▪ Reservation & Booking System (Club Amsterdam Barbershop)</div>
+        <ul class="achievements">
+          <li>Designed an end-to-end online booking web application with calendar management and service selection.</li>
+          <li>Developed automated booking confirmations and reminders, significantly reducing missed appointments and freeing up management time.</li>
+        </ul>
+      </div>
+
+      <div class="project">
+        <div class="project-title">▪ E-commerce Platform (Roma Descartable)</div>
+        <ul class="achievements">
+          <li>Built a performant product catalog with search, categorization, and a full shopping cart checkout flow for a packaging supplier, improving the digital customer experience.</li>
+        </ul>
+      </div>
+      
+      <div class="project">
+        <div class="project-title">▪ Conversion-Optimized Landing Pages (AburridoNT, Victor Ruiz)</div>
+        <ul class="achievements">
+          <li>Developed fast, mobile-first landing pages for service-based businesses emphasizing clean design and optimized load times to maximize lead generation.</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Education</h2>
+    <div class="edu-item">
+      <div><strong>Universidad Nacional de La Matanza (UNLaM)</strong><br>Tecnicatura en Desarrollo Web</div>
+      <div class="job-date">August 2025 - Present</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Languages</h2>
+    <ul class="skills-list" style="columns: 2; column-gap: 2rem; max-width: 300px;">
+      <li><strong>English:</strong> C2 Proficiency</li>
+      <li><strong>Spanish:</strong> Native</li>
+    </ul>
+  </section>
+
+</body>
+</html>
