@@ -60,7 +60,7 @@ export const initialExperienceReviews = [
     company: "Club Amsterdam",
     firstName: "Cliente",
     id: "club-amsterdam-preview",
-    isVisible: true,
+    isVisible: false,
     lastName: "Demo",
     outcome: "La experiencia quedó más clara para el cliente y más cómoda para administrar internamente.",
     photos: [{ name: "Reservas" }, { name: "Dashboard" }],
@@ -74,7 +74,7 @@ export const initialExperienceReviews = [
     company: "Proyecto inmobiliario",
     firstName: "Cliente",
     id: "real-estate-preview",
-    isVisible: true,
+    isVisible: false,
     lastName: "Demo",
     outcome: "El sitio quedó más moderno, más confiable y preparado para mostrar propiedades con mejor criterio visual.",
     photos: [{ name: "Home" }, { name: "Propiedades" }],
@@ -88,7 +88,7 @@ export const initialExperienceReviews = [
     company: "E-commerce",
     firstName: "Cliente",
     id: "ecommerce-preview",
-    isVisible: true,
+    isVisible: false,
     lastName: "Demo",
     outcome: "La marca ganó una base digital clara para mostrar productos, recibir consultas y seguir creciendo.",
     photos: [{ name: "Catálogo" }, { name: "Producto" }],
@@ -119,4 +119,8 @@ export function mergeExperienceReviewsWithDefaults(reviews) {
 
 export function getVisibleExperienceReviews(reviews) {
   return normalizeExperienceReviews(reviews).filter((review) => review.isVisible !== false);
+}
+
+export function getPublicExperienceReviews(reviews) {
+  return getVisibleExperienceReviews(reviews).filter((review) => review.id === "club-amsterdam-matias-damonte");
 }

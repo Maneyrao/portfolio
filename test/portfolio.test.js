@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
+import { getPublicExperienceReviews, initialExperienceReviews } from "../src/data/experienceReviews.js";
 import { getSectorPrimaryHref, workSectors } from "../src/data/workSectors.js";
 
 const page = readFileSync(new URL("../src/app/page.jsx", import.meta.url), "utf8");
@@ -186,9 +187,13 @@ describe("clean portfolio baseline", () => {
     assert.match(experienceComponent, /defaultExperienceForm/);
     assert.match(experienceComponent, /initialExperienceReviews/);
     assert.match(experienceComponent, /EXPERIENCE_REVIEWS_KEY/);
-    assert.match(experienceComponent, /getVisibleExperienceReviews/);
+    assert.match(experienceComponent, /getPublicExperienceReviews/);
     assert.match(experienceComponent, /mergeExperienceReviewsWithDefaults/);
     assert.match(experienceComponent, /revealImmediately/);
+    assert.match(experienceComponent, /showHeader=\{false\}/);
+    assert.doesNotMatch(experienceComponent, /Opiniones aprobadas/);
+    assert.doesNotMatch(experienceComponent, /Reseñas visibles desde el panel admin/);
+    assert.doesNotMatch(experienceComponent, /Lo que cambió después de trabajar juntos/);
     assert.match(experienceComponent, /isVisible: false/);
     assert.match(experienceComponent, /experienceForm/);
     assert.match(experienceComponent, /experienceReviews/);
@@ -225,6 +230,10 @@ describe("clean portfolio baseline", () => {
     assert.match(experienceData, /club-amsterdam-matias-damonte/);
     assert.match(experienceData, /Pagábamos mucho por un sistema web de agendas/);
     assert.match(experienceData, /Ahora tenemos una página 100% personalizada/);
+    assert.deepEqual(
+      getPublicExperienceReviews(initialExperienceReviews).map((review) => review.id),
+      ["club-amsterdam-matias-damonte"],
+    );
     assert.match(experienceComponent, /Qué cambió/);
     assert.match(experienceComponent, /Pasarela de reseñas/);
     assert.match(experienceComponent, /Pasarela de comentarios/);

@@ -8,7 +8,6 @@ import {
   EXPERIENCE_REVIEWS_KEY,
   initialExperienceReviews,
   mergeExperienceReviewsWithDefaults,
-  normalizeExperienceReviews,
 } from "../data/experienceReviews.js";
 
 function formatProjectUrl(projectUrl) {

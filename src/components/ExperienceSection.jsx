@@ -6,7 +6,7 @@ import { contactEmail, contactWhatsappHref } from "../data/contact.js";
 import {
   defaultExperienceForm,
   EXPERIENCE_REVIEWS_KEY,
-  getVisibleExperienceReviews,
+  getPublicExperienceReviews,
   initialExperienceReviews,
   mergeExperienceReviewsWithDefaults,
   normalizeExperienceReviews,
@@ -85,25 +85,35 @@ function ReviewPhotos({ photos = [] }) {
   );
 }
 
-export function ExperienceReviewCarousel({ copy, revealImmediately = false, reviews, title = "Pasarela de comentarios" }) {
+export function ExperienceReviewCarousel({
+  copy,
+  revealImmediately = false,
+  reviews,
+  showHeader = true,
+  title = "Pasarela de comentarios",
+}) {
   const carouselReviews = reviews.length > 0 ? reviews : initialExperienceReviews;
-  const loopReviews = [...carouselReviews, ...carouselReviews];
+  const hasSingleReview = carouselReviews.length === 1;
+  const loopReviews = hasSingleReview ? carouselReviews : [...carouselReviews, ...carouselReviews];
+  const headerCopy =
+    copy === undefined
+      ? "Comentarios cortos, contexto del proyecto y material visual. La idea es que cada reseña se lea como una mini historia de trabajo."
+      : copy;
 
   return (
     <div className={`experience-carousel animate-on-scroll${revealImmediately ? " animate-in" : ""}`}>
-      <div className="container experience-carousel-header">
-        <div>
-          <span className="section-eyebrow">Experiencias</span>
-          <h3>{title}</h3>
+      {showHeader && (
+        <div className="container experience-carousel-header">
+          <div>
+            <span className="section-eyebrow">Experiencias</span>
+            <h3>{title}</h3>
+          </div>
+          {headerCopy && <p>{headerCopy}</p>}
         </div>
-        <p>
-          {copy ||
-            "Comentarios cortos, contexto del proyecto y material visual. La idea es que cada reseña se lea como una mini historia de trabajo."}
-        </p>
-      </div>
+      )}
 
       <div className="experience-marquee" aria-label="Pasarela de reseñas">
-        <div className="experience-marquee-track">
+        <div className={`experience-marquee-track${hasSingleReview ? " experience-marquee-track-static" : ""}`}>
           {loopReviews.map((review, index) => (
             <article className="experience-review-card" key={`${review.id}-${index}`}>
               <div className="experience-review-topline">
@@ -173,19 +183,23 @@ export function ExperiencePreview() {
 }
 
 export function ExperiencePublicPreview() {
-  const [approvedReviews, setApprovedReviews] = useState(() => getVisibleExperienceReviews(initialExperienceReviews));
+  const [approvedReviews, setApprovedReviews] = useState(() => getPublicExperienceReviews(initialExperienceReviews));
 
   useEffect(() => {
-    try {
-      const savedReviews = window.localStorage.getItem(EXPERIENCE_REVIEWS_KEY);
-      const parsedReviews = savedReviews
-        ? mergeExperienceReviewsWithDefaults(JSON.parse(savedReviews))
-        : initialExperienceReviews;
+    const syncFrame = window.requestAnimationFrame(() => {
+      try {
+        const savedReviews = window.localStorage.getItem(EXPERIENCE_REVIEWS_KEY);
+        const parsedReviews = savedReviews
+          ? mergeExperienceReviewsWithDefaults(JSON.parse(savedReviews))
+          : initialExperienceReviews;
 
-      setApprovedReviews(getVisibleExperienceReviews(parsedReviews));
-    } catch {
-      setApprovedReviews(getVisibleExperienceReviews(initialExperienceReviews));
-    }
+        setApprovedReviews(getPublicExperienceReviews(parsedReviews));
+      } catch {
+        setApprovedReviews(getPublicExperienceReviews(initialExperienceReviews));
+      }
+    });
+
+    return () => window.cancelAnimationFrame(syncFrame);
   }, []);
 
   if (approvedReviews.length === 0) return null;
@@ -193,19 +207,13 @@ export function ExperiencePublicPreview() {
   return (
     <section className="section proof-section public-experiences-section" id="experiencias">
       <div className="container public-experience-intro animate-on-scroll animate-in">
-        <span className="section-eyebrow">Experiencias</span>
-        <h2>Lo que cambió después de trabajar juntos</h2>
-        <p>
-          Opiniones aprobadas, contexto del proyecto y resultados contados por clientes reales antes de agendar una
-          llamada.
-        </p>
+        <h2>Experiencias</h2>
       </div>
 
       <ExperienceReviewCarousel
-        copy="Reseñas visibles desde el panel admin: mostrás solo las que querés publicar."
         revealImmediately
         reviews={approvedReviews}
-        title="Opiniones aprobadas"
+        showHeader={false}
       />
     </section>
   );
