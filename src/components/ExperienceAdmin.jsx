@@ -44,9 +44,9 @@ function buildReviewFromForm(form) {
 }
 
 function getInitialPublicEnabled() {
-  if (typeof window === "undefined") return false;
+  if (typeof window === "undefined") return true;
 
-  return window.localStorage.getItem(EXPERIENCE_PUBLIC_ENABLED_KEY) === "true";
+  return window.localStorage.getItem(EXPERIENCE_PUBLIC_ENABLED_KEY) !== "false";
 }
 
 function getInitialReviews() {

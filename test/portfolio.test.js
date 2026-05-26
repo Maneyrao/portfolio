@@ -212,6 +212,10 @@ describe("clean portfolio baseline", () => {
     assert.match(experienceComponent, /experience-delivery-panel/);
     assert.match(experienceComponent, /ExperienceReviewCarousel/);
     assert.match(experienceData, /tm-experience-reviews/);
+    assert.match(experienceData, /club-amsterdam-matias-damonte/);
+    assert.match(experienceData, /Pagábamos mucho por un sistema web de agendas/);
+    assert.match(experienceData, /Ahora tenemos una página 100% personalizada/);
+    assert.match(experienceComponent, /Qué cambió/);
     assert.match(experienceComponent, /Pasarela de reseñas/);
     assert.match(experienceComponent, /Pasarela de comentarios/);
     assert.match(experienceComponent, /La mejor reseña no es perfecta/);

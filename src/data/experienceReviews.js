@@ -27,6 +27,35 @@ export const defaultAdminReviewForm = {
 
 export const initialExperienceReviews = [
   {
+    challenge:
+      "Pagábamos mucho por un sistema web de agendas que no nos identificaba ni representaba.",
+    company: "Club Amsterdam",
+    firstName: "Matías",
+    id: "club-amsterdam-matias-damonte",
+    isVisible: true,
+    lastName: "Damonte",
+    outcome:
+      "Ahora tenemos una página 100% personalizada y al detalle, que transmite la esencia de la marca y la impulsa a la perfección.",
+    photos: [
+      {
+        imageUrl: "/images/work/club-amsterdam-hero.png",
+        name: "Club Amsterdam",
+      },
+      {
+        imageUrl: "/images/work/club-amsterdam-public-agenda.png",
+        name: "Agenda pública",
+      },
+      {
+        imageUrl: "/images/work/club-amsterdam-admin-agenda.png",
+        name: "Panel admin",
+      },
+    ],
+    projectUrl: "https://clubamsterdam.app",
+    review:
+      "En un principio ya había buen criterio, la página web quedó muy acorde. Le hicimos muchas modificaciones y la desarrollamos hasta llegar a su mejor versión. Valoro mucho el acompañamiento personalizado, que fue de mucha ayuda.",
+    status: "Opinión aprobada",
+  },
+  {
     challenge: "Necesitábamos ordenar reservas, consultas y una experiencia digital que estuviera al nivel de la marca.",
     company: "Club Amsterdam",
     firstName: "Cliente",

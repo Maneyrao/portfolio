@@ -122,6 +122,12 @@ export function ExperienceReviewCarousel({ copy, revealImmediately = false, revi
                 <span>Problema</span>
                 <strong>{review.challenge}</strong>
               </div>
+              {review.outcome && (
+                <div className="experience-review-context">
+                  <span>Qué cambió</span>
+                  <strong>{review.outcome}</strong>
+                </div>
+              )}
               <div className="experience-review-author">
                 {review.firstName} {review.lastName}
                 {review.company && <span>{review.company}</span>}
@@ -177,7 +183,7 @@ export function ExperiencePublicPreview() {
       const savedReviews = window.localStorage.getItem(EXPERIENCE_REVIEWS_KEY);
       const parsedReviews = savedReviews ? JSON.parse(savedReviews) : initialExperienceReviews;
 
-      setPublicEnabled(savedVisibility === "true");
+      setPublicEnabled(savedVisibility !== "false");
       setApprovedReviews(getVisibleExperienceReviews(parsedReviews));
     } catch {
       setPublicEnabled(false);
