@@ -142,6 +142,31 @@ a {
   display: none;
 }
 
+@media (max-width: 960px) {
+  .nav-links,
+  .desktop-cta {
+    display: none;
+  }
+
+  .mobile-menu-btn {
+    display: grid;
+    place-items: center;
+  }
+
+  .mobile-menu {
+    display: grid;
+    gap: 20px;
+    border-top: 1px solid var(--border);
+    padding: 24px;
+    background: #ffffff;
+  }
+
+  .mobile-menu a {
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+}
+
 .hero {
   min-height: auto;
   padding: clamp(94px, 13svh, 118px) 0 clamp(34px, 6svh, 54px);

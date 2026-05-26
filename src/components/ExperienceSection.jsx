@@ -192,7 +192,7 @@ export function ExperiencePublicPreview() {
 
   return (
     <section className="section proof-section public-experiences-section" id="experiencias">
-      <div className="container public-experience-intro animate-on-scroll">
+      <div className="container public-experience-intro animate-on-scroll animate-in">
         <span className="section-eyebrow">Experiencias</span>
         <h2>Lo que cambió después de trabajar juntos</h2>
         <p>
@@ -203,6 +203,7 @@ export function ExperiencePublicPreview() {
 
       <ExperienceReviewCarousel
         copy="Reseñas visibles desde el panel admin: mostrás solo las que querés publicar."
+        revealImmediately
         reviews={approvedReviews}
         title="Opiniones aprobadas"
       />

@@ -17,11 +17,12 @@ const layout = readFileSync(new URL("../src/app/layout.jsx", import.meta.url), "
 
 describe("clean portfolio baseline", () => {
   it("uses the modern portfolio sections as the new starting structure", () => {
-    for (const id of ["about", "work", "services", "agenda", "process"]) {
+    for (const id of ["about", "work", "services", "process", "agenda"]) {
       assert.match(page, new RegExp(`id="${id}"`));
     }
+    assert.match(experienceComponent, /id="experiencias"/);
     assert.doesNotMatch(page, /<ExperiencePreview \/>/);
-    assert.doesNotMatch(page, /href: "#experiencias"/);
+    assert.match(page, /label: "Experiencias", href: "#experiencias"/);
     assert.doesNotMatch(page, /id="contact"/);
   });
 
@@ -124,13 +125,19 @@ describe("clean portfolio baseline", () => {
       "services should appear before process",
     );
     assert.ok(
-      page.indexOf('id="process"') < page.indexOf('id="agenda"'),
-      "process should appear before agenda",
+      page.indexOf('id="process"') < page.indexOf("<ExperiencePublicPreview />"),
+      "process should appear before experiences",
+    );
+    assert.ok(
+      page.indexOf("<ExperiencePublicPreview />") < page.indexOf('id="agenda"'),
+      "experiences should appear before agenda",
     );
   });
 
   it("publishes real contact channels and a lightweight scheduling intake", () => {
     assert.match(contactData, /contactEmail = "tmaneyro@gmail\.com"/);
+    assert.match(contactData, /contactInstagramDisplay = "@thiagomaneyro\.dev"/);
+    assert.match(contactData, /contactInstagramHref = "https:\/\/www\.instagram\.com\/thiagomaneyro\.dev\/"/);
     assert.match(contactData, /contactPhoneHref = "tel:\+5491169004497"/);
     assert.match(contactData, /contactWhatsappHref = "https:\/\/wa\.me\/5491169004497"/);
     assert.match(page, /agendaForm/);
@@ -144,6 +151,8 @@ describe("clean portfolio baseline", () => {
     assert.match(page, /Consulta inicial/);
     assert.match(page, /Agendemos una llamada simple/);
     assert.match(page, /15-20 minutos/);
+    assert.match(page, /contactInstagramHref/);
+    assert.match(page, /contactInstagramDisplay/);
     assert.match(page, /Enviar por email/);
     assert.match(css, /agenda-section/);
     assert.match(css, /agenda-form/);
@@ -161,7 +170,7 @@ describe("clean portfolio baseline", () => {
   });
 
   it("adds a client experience request form for review approval", () => {
-    assert.doesNotMatch(page, /href: "#experiencias"/);
+    assert.match(page, /href: "#experiencias"/);
     assert.doesNotMatch(page, /<ExperiencePreview \/>/);
     assert.doesNotMatch(page, /Prueba social/);
     assert.doesNotMatch(page, /Pasarela de comentarios/);
@@ -179,6 +188,7 @@ describe("clean portfolio baseline", () => {
     assert.match(experienceComponent, /EXPERIENCE_REVIEWS_KEY/);
     assert.match(experienceComponent, /getVisibleExperienceReviews/);
     assert.match(experienceComponent, /mergeExperienceReviewsWithDefaults/);
+    assert.match(experienceComponent, /revealImmediately/);
     assert.match(experienceComponent, /isVisible: false/);
     assert.match(experienceComponent, /experienceForm/);
     assert.match(experienceComponent, /experienceReviews/);

@@ -4,7 +4,14 @@ import { AnimatePresence, motion as Motion } from "framer-motion";
 import { ArrowUpRight, Bot, Code2, LayoutTemplate, Menu, Plus, ShoppingBag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ExperiencePublicPreview } from "../components/ExperienceSection.jsx";
-import { contactEmail, contactPhoneDisplay, contactPhoneHref, contactWhatsappHref } from "../data/contact.js";
+import {
+  contactEmail,
+  contactInstagramDisplay,
+  contactInstagramHref,
+  contactPhoneDisplay,
+  contactPhoneHref,
+  contactWhatsappHref,
+} from "../data/contact.js";
 import { getSectorPrimaryHref, sectorHasLink, workSectors } from "../data/workSectors.js";
 
 const navItems = [
@@ -12,6 +19,7 @@ const navItems = [
   { label: "Trabajos", href: "#work" },
   { label: "Servicios", href: "#services" },
   { label: "Proceso", href: "#process" },
+  { label: "Experiencias", href: "#experiencias" },
   { label: "Agenda", href: "#agenda" },
 ];
 
@@ -507,6 +515,9 @@ Detalle: ${agendaForm.brief || "Sin completar"}`,
               <div className="agenda-direct-links">
                 <a href={contactPhoneHref}>{contactPhoneDisplay}</a>
                 <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
+                <a href={contactInstagramHref} rel="noreferrer" target="_blank">
+                  {contactInstagramDisplay}
+                </a>
               </div>
             </div>
 
