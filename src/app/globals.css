@@ -2388,6 +2388,21 @@ a {
   animation-play-state: paused;
 }
 
+.experience-static-review-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 520px);
+  justify-content: center;
+  padding-top: clamp(28px, 4vw, 44px);
+}
+
+.experience-static-review-grid .experience-review-card {
+  width: 100%;
+  min-height: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 12px 12px 0 #e8e8e8;
+}
+
 .experience-review-card {
   display: grid;
   width: min(420px, 82vw);

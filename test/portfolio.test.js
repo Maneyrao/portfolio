@@ -190,7 +190,8 @@ describe("clean portfolio baseline", () => {
     assert.match(experienceComponent, /getPublicExperienceReviews/);
     assert.match(experienceComponent, /mergeExperienceReviewsWithDefaults/);
     assert.match(experienceComponent, /revealImmediately/);
-    assert.match(experienceComponent, /showHeader=\{false\}/);
+    assert.match(experienceComponent, /experience-static-review-grid/);
+    assert.match(experienceComponent, /ExperienceReviewCard key=\{review\.id\}/);
     assert.doesNotMatch(experienceComponent, /Opiniones aprobadas/);
     assert.doesNotMatch(experienceComponent, /Reseñas visibles desde el panel admin/);
     assert.doesNotMatch(experienceComponent, /Lo que cambió después de trabajar juntos/);
@@ -252,6 +253,7 @@ describe("clean portfolio baseline", () => {
     assert.match(css, /experience-upload-zone/);
     assert.match(css, /experience-photo-preview/);
     assert.match(css, /experience-marquee/);
+    assert.match(css, /experience-static-review-grid/);
     assert.match(css, /experience-review-card/);
     assert.match(css, /experience-review-media/);
     assert.match(css, /@keyframes experience-marquee/);

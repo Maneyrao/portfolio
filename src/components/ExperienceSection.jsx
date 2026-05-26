@@ -85,6 +85,39 @@ function ReviewPhotos({ photos = [] }) {
   );
 }
 
+function ExperienceReviewCard({ review, suffix = "" }) {
+  return (
+    <article className="experience-review-card" key={`${review.id}${suffix}`}>
+      <div className="experience-review-topline">
+        <span>{review.status}</span>
+        {review.projectUrl ? (
+          <a href={review.projectUrl} rel="noreferrer" target="_blank">
+            {formatProjectUrl(review.projectUrl)}
+          </a>
+        ) : (
+          <span>{formatProjectUrl(review.projectUrl)}</span>
+        )}
+      </div>
+      <ReviewPhotos photos={review.photos} />
+      <p>{review.review}</p>
+      <div className="experience-review-context">
+        <span>Problema</span>
+        <strong>{review.challenge}</strong>
+      </div>
+      {review.outcome && (
+        <div className="experience-review-context">
+          <span>Qué cambió</span>
+          <strong>{review.outcome}</strong>
+        </div>
+      )}
+      <div className="experience-review-author">
+        {review.firstName} {review.lastName}
+        {review.company && <span>{review.company}</span>}
+      </div>
+    </article>
+  );
+}
+
 export function ExperienceReviewCarousel({
   copy,
   revealImmediately = false,
@@ -115,34 +148,7 @@ export function ExperienceReviewCarousel({
       <div className="experience-marquee" aria-label="Pasarela de reseñas">
         <div className={`experience-marquee-track${hasSingleReview ? " experience-marquee-track-static" : ""}`}>
           {loopReviews.map((review, index) => (
-            <article className="experience-review-card" key={`${review.id}-${index}`}>
-              <div className="experience-review-topline">
-                <span>{review.status}</span>
-                {review.projectUrl ? (
-                  <a href={review.projectUrl} rel="noreferrer" target="_blank">
-                    {formatProjectUrl(review.projectUrl)}
-                  </a>
-                ) : (
-                  <span>{formatProjectUrl(review.projectUrl)}</span>
-                )}
-              </div>
-              <ReviewPhotos photos={review.photos} />
-              <p>{review.review}</p>
-              <div className="experience-review-context">
-                <span>Problema</span>
-                <strong>{review.challenge}</strong>
-              </div>
-              {review.outcome && (
-                <div className="experience-review-context">
-                  <span>Qué cambió</span>
-                  <strong>{review.outcome}</strong>
-                </div>
-              )}
-              <div className="experience-review-author">
-                {review.firstName} {review.lastName}
-                {review.company && <span>{review.company}</span>}
-              </div>
-            </article>
+            <ExperienceReviewCard key={`${review.id}-${index}`} review={review} suffix={`-${index}`} />
           ))}
         </div>
       </div>
@@ -210,11 +216,11 @@ export function ExperiencePublicPreview() {
         <h2>Experiencias</h2>
       </div>
 
-      <ExperienceReviewCarousel
-        revealImmediately
-        reviews={approvedReviews}
-        showHeader={false}
-      />
+      <div className="container experience-static-review-grid animate-on-scroll animate-in">
+        {approvedReviews.map((review) => (
+          <ExperienceReviewCard key={review.id} review={review} />
+        ))}
+      </div>
     </section>
   );
 }
