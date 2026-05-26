@@ -109,6 +109,14 @@ export function normalizeExperienceReviews(reviews) {
   }));
 }
 
+export function mergeExperienceReviewsWithDefaults(reviews) {
+  const normalizedReviews = normalizeExperienceReviews(reviews);
+  const defaultIds = new Set(initialExperienceReviews.map((review) => review.id));
+  const customReviews = normalizedReviews.filter((review) => !defaultIds.has(review.id));
+
+  return [...initialExperienceReviews, ...customReviews];
+}
+
 export function getVisibleExperienceReviews(reviews) {
   return normalizeExperienceReviews(reviews).filter((review) => review.isVisible !== false);
 }

@@ -7,6 +7,7 @@ import {
   EXPERIENCE_PUBLIC_ENABLED_KEY,
   EXPERIENCE_REVIEWS_KEY,
   initialExperienceReviews,
+  mergeExperienceReviewsWithDefaults,
   normalizeExperienceReviews,
 } from "../data/experienceReviews.js";
 
@@ -55,7 +56,7 @@ function getInitialReviews() {
   try {
     const savedReviews = window.localStorage.getItem(EXPERIENCE_REVIEWS_KEY);
 
-    return savedReviews ? normalizeExperienceReviews(JSON.parse(savedReviews)) : initialExperienceReviews;
+    return savedReviews ? mergeExperienceReviewsWithDefaults(JSON.parse(savedReviews)) : initialExperienceReviews;
   } catch {
     return initialExperienceReviews;
   }

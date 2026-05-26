@@ -176,9 +176,9 @@ describe("clean portfolio baseline", () => {
     assert.match(experienceComponent, /ExperiencePublicPreview/);
     assert.match(experienceComponent, /defaultExperienceForm/);
     assert.match(experienceComponent, /initialExperienceReviews/);
-    assert.match(experienceComponent, /EXPERIENCE_PUBLIC_ENABLED_KEY/);
     assert.match(experienceComponent, /EXPERIENCE_REVIEWS_KEY/);
     assert.match(experienceComponent, /getVisibleExperienceReviews/);
+    assert.match(experienceComponent, /mergeExperienceReviewsWithDefaults/);
     assert.match(experienceComponent, /isVisible: false/);
     assert.match(experienceComponent, /experienceForm/);
     assert.match(experienceComponent, /experienceReviews/);

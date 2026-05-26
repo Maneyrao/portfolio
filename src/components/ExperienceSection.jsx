@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { contactEmail, contactWhatsappHref } from "../data/contact.js";
 import {
   defaultExperienceForm,
-  EXPERIENCE_PUBLIC_ENABLED_KEY,
   EXPERIENCE_REVIEWS_KEY,
   getVisibleExperienceReviews,
   initialExperienceReviews,
+  mergeExperienceReviewsWithDefaults,
   normalizeExperienceReviews,
 } from "../data/experienceReviews.js";
 
@@ -173,27 +173,22 @@ export function ExperiencePreview() {
 }
 
 export function ExperiencePublicPreview() {
-  const [publicEnabled, setPublicEnabled] = useState(false);
-  const [approvedReviews, setApprovedReviews] = useState([]);
-  const [ready, setReady] = useState(false);
+  const [approvedReviews, setApprovedReviews] = useState(() => getVisibleExperienceReviews(initialExperienceReviews));
 
   useEffect(() => {
     try {
-      const savedVisibility = window.localStorage.getItem(EXPERIENCE_PUBLIC_ENABLED_KEY);
       const savedReviews = window.localStorage.getItem(EXPERIENCE_REVIEWS_KEY);
-      const parsedReviews = savedReviews ? JSON.parse(savedReviews) : initialExperienceReviews;
+      const parsedReviews = savedReviews
+        ? mergeExperienceReviewsWithDefaults(JSON.parse(savedReviews))
+        : initialExperienceReviews;
 
-      setPublicEnabled(savedVisibility !== "false");
       setApprovedReviews(getVisibleExperienceReviews(parsedReviews));
     } catch {
-      setPublicEnabled(false);
-      setApprovedReviews([]);
-    } finally {
-      setReady(true);
+      setApprovedReviews(getVisibleExperienceReviews(initialExperienceReviews));
     }
   }, []);
 
-  if (!ready || !publicEnabled || approvedReviews.length === 0) return null;
+  if (approvedReviews.length === 0) return null;
 
   return (
     <section className="section proof-section public-experiences-section" id="experiencias">
