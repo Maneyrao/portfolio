@@ -1,0 +1,111 @@
+{
+  "name": "Daily Social Reminder - Thiago",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Setup required after import:\n1. Set workflow timezone to America/Argentina/Buenos_Aires.\n2. Create n8n variables: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, N8N_DAILY_SOCIAL_FORM_URL.\n3. Publish the workflow so the Schedule Trigger runs daily.",
+        "height": 220,
+        "width": 360,
+        "color": 4
+      },
+      "id": "8f8f7f2d-a3a8-4d0b-8eb0-4c3f5f3a0a01",
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        180,
+        120
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 19,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "b3c1c98c-3251-45d3-a1cc-7d11713e0b30",
+      "name": "Daily 19h Reminder",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const formUrl = $vars.N8N_DAILY_SOCIAL_FORM_URL || 'PASTE_N8N_FORM_PRODUCTION_URL_HERE';\nconst chatId = $vars.TELEGRAM_CHAT_ID || 'PASTE_TELEGRAM_CHAT_ID_HERE';\nconst text = `Que construiste hoy? Contame en 2 minutos y te preparo LinkedIn + X.\\n\\nFormulario: ${formUrl}`;\nreturn [{ json: { chat_id: chatId, text } }];"
+      },
+      "id": "c8f8db9f-a208-46da-a7e6-f2ab15d4cc33",
+      "name": "Build Reminder Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        500,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.telegram.org/bot' + $vars.TELEGRAM_BOT_TOKEN + '/sendMessage' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: $json.chat_id, text: $json.text, disable_web_page_preview: true }) }}"
+      },
+      "id": "6dbbda84-69b1-4308-aef1-4057f2ce69b6",
+      "name": "Telegram - Send Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        790,
+        420
+      ]
+    }
+  ],
+  "connections": {
+    "Daily 19h Reminder": {
+      "main": [
+        [
+          {
+            "node": "Build Reminder Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Reminder Message": {
+      "main": [
+        [
+          {
+            "node": "Telegram - Send Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "timezone": "America/Argentina/Buenos_Aires",
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "social-agent"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-05-27T00:00:00.000Z",
+  "versionId": "daily-social-reminder-v1"
+}

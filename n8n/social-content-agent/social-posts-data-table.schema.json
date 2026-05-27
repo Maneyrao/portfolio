@@ -1,0 +1,107 @@
+{
+  "table": "social_posts",
+  "description": "Editorial log for the daily social content agent.",
+  "columns": [
+    {
+      "name": "draft_id",
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    {
+      "name": "date",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "source_payload",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "linkedin_text",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "x_text",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "summary",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "risk_flags",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "content_pillar",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "required": true,
+      "allowedValues": [
+        "DRAFTED",
+        "REWRITE_REQUESTED",
+        "APPROVED",
+        "SCHEDULED",
+        "PUBLISHED",
+        "PARTIAL_FAILURE",
+        "FAILED",
+        "DISCARDED"
+      ]
+    },
+    {
+      "name": "attempt_count",
+      "type": "number",
+      "required": true
+    },
+    {
+      "name": "approved_at",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "scheduled_for",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "linkedin_url",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "x_url",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "telegram_chat_id",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "telegram_message_id",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "approval_token",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "error_message",
+      "type": "string",
+      "required": false
+    }
+  ]
+}

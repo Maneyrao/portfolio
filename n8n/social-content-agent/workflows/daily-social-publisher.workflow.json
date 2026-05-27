@@ -1,0 +1,933 @@
+{
+  "name": "Daily Social Publisher - Thiago",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "Setup required after import:\n1. Create n8n variables: OPENAI_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, SOCIAL_AGENT_WEBHOOK_SECRET.\n2. Create Data Table named social_posts with the columns from social-posts-data-table.schema.json.\n3. Connect LinkedIn personal profile and X IT account credentials in the Publish nodes.\n4. Activate Telegram Trigger for callback_query events.\n5. Publish the workflow before using production Form/Webhook URLs.",
+        "height": 280,
+        "width": 420,
+        "color": 4
+      },
+      "id": "8a5b2dd8-1c43-42d7-8a06-30d2d0f42a11",
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "Contame tu dia",
+        "formDescription": "Pasame contexto real y preparo drafts para LinkedIn + X. Si no hay algo publicable, el agente te va a pedir mas contexto.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Que construiste o trabajaste hoy?",
+              "fieldName": "worked_on",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Que problema resolviste?",
+              "fieldName": "problem_solved",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Que aprendiste o que criterio aplicaste?",
+              "fieldName": "lesson",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Cliente o proyecto, solo si se puede nombrar",
+              "fieldName": "client_or_project",
+              "fieldType": "text",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Detalle tecnico",
+              "fieldName": "technical_detail",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Angulo de negocio",
+              "fieldName": "business_angle",
+              "fieldType": "textarea",
+              "requiredField": false
+            },
+            {
+              "fieldLabel": "Que NO queres que mencione?",
+              "fieldName": "avoid",
+              "fieldType": "textarea",
+              "requiredField": false
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Generar drafts",
+          "path": "daily-social-intake"
+        }
+      },
+      "id": "5dd3c0b1-5df8-4fe4-837c-8c1bc764ba72",
+      "name": "Form - Daily Intake",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -360,
+        220
+      ],
+      "webhookId": "daily-social-intake-form"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "social-daily-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "5b1dc753-1fb0-4e3f-b598-6de80634f0ed",
+      "name": "Webhook - JSON Intake",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -360,
+        420
+      ],
+      "webhookId": "social-daily-intake-json"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "callback_query"
+        ]
+      },
+      "id": "110ea2c4-55eb-441f-8efa-6106f68bbdd5",
+      "name": "Telegram - Approval Callback",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const isWebhook = Boolean($json.body);\nconst headers = $json.headers || {};\nconst payload = isWebhook ? $json.body : $json;\nconst configuredSecret = $vars.SOCIAL_AGENT_WEBHOOK_SECRET;\nconst incomingSecret = headers['x-social-agent-secret'] || headers['X-Social-Agent-Secret'];\n\nif (isWebhook && configuredSecret && incomingSecret !== configuredSecret) {\n  return [{ json: { stop: true, status: 'FAILED', error_message: 'Invalid webhook secret' } }];\n}\n\nconst required = ['worked_on', 'problem_solved', 'lesson'];\nconst missing = required.filter((key) => !String(payload[key] || '').trim());\nconst draftId = payload.draft_id || `social_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;\nconst approvalToken = Math.random().toString(36).slice(2, 12);\n\nreturn [{\n  json: {\n    draft_id: draftId,\n    date: payload.date || new Date().toISOString().slice(0, 10),\n    worked_on: String(payload.worked_on || '').trim(),\n    problem_solved: String(payload.problem_solved || '').trim(),\n    lesson: String(payload.lesson || '').trim(),\n    client_or_project: String(payload.client_or_project || '').trim(),\n    technical_detail: String(payload.technical_detail || '').trim(),\n    business_angle: String(payload.business_angle || '').trim(),\n    avoid: String(payload.avoid || '').trim(),\n    source_payload: JSON.stringify(payload),\n    attempt_count: Number(payload.attempt_count || 0),\n    approval_token: approvalToken,\n    telegram_chat_id: $vars.TELEGRAM_CHAT_ID,\n    needs_more_context: missing.length > 0,\n    missing_fields: missing,\n    status: missing.length > 0 ? 'FAILED' : 'DRAFTED'\n  }\n}];"
+      },
+      "id": "4c3d96de-ae9a-408a-8350-765f195ef307",
+      "name": "Normalize Intake",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -40,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.needs_more_context }}",
+              "value2": false
+            }
+          ]
+        }
+      },
+      "id": "1d8177f1-5b31-4f1b-b44d-92d16a9e3abe",
+      "name": "Has Enough Context?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        260,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.telegram.org/bot' + $vars.TELEGRAM_BOT_TOKEN + '/sendMessage' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: $json.telegram_chat_id, text: 'Me falta contexto para redactar bien. Completá: ' + $json.missing_fields.join(', ') + '. Volvé al formulario y agregá esos datos.', disable_web_page_preview: true }) }}"
+      },
+      "id": "134e0571-2848-47aa-b126-db110d96a7cf",
+      "name": "Telegram - Ask More Context",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const system = `Sos el agente editorial de Thiago Maneyro. Converti lo que cuenta de su dia en contenido de marca personal para LinkedIn y X. Voz: espanol rioplatense, cercano, reflexivo, profesional y con criterio. No inventes clientes, metricas, tecnologias, resultados ni fechas. No reveles datos sensibles. LinkedIn: 700 a 1600 caracteres, hook claro, parrafos cortos, cierre con reflexion o pregunta. X: maximo 260 caracteres, una idea fuerte. Respondé solo JSON valido con linkedin_text, x_text, summary, risk_flags y content_pillar. content_pillar debe ser behind_the_scenes, lesson, case_study o technical_take.`;\nconst userPayload = {\n  date: $json.date,\n  worked_on: $json.worked_on,\n  problem_solved: $json.problem_solved,\n  lesson: $json.lesson,\n  client_or_project: $json.client_or_project,\n  technical_detail: $json.technical_detail,\n  business_angle: $json.business_angle,\n  avoid: $json.avoid,\n  attempt_count: $json.attempt_count\n};\nreturn [{\n  json: {\n    ...$json,\n    openai_body: {\n      model: 'gpt-4.1-mini',\n      input: [\n        { role: 'system', content: system },\n        { role: 'user', content: JSON.stringify(userPayload) }\n      ],\n      text: { format: { type: 'json_object' } }\n    }\n  }\n}];"
+      },
+      "id": "1011b86c-c482-4baa-bd2c-d2c228dbe4e8",
+      "name": "Build OpenAI Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/responses",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $vars.OPENAI_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.openai_body) }}"
+      },
+      "id": "49d02193-a21a-41e2-bff8-120f185d17e2",
+      "name": "OpenAI - Draft Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        860,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Build OpenAI Request').first().json;\nconst raw = $json.output_text || $json.output?.flatMap((item) => item.content || []).find((part) => part.text)?.text || '';\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (error) {\n  parsed = {\n    linkedin_text: 'Hoy estuve trabajando en una solucion digital y me quedo una idea clara: el valor no esta solo en construir, sino en entender que problema vale la pena resolver primero.',\n    x_text: 'Construir software no es solo escribir codigo. Es entender que problema conviene resolver primero y como bajarle friccion al negocio.',\n    summary: 'Fallback draft because model JSON parsing failed.',\n    risk_flags: ['model_parse_error'],\n    content_pillar: 'lesson'\n  };\n}\nreturn [{\n  json: {\n    ...source,\n    linkedin_text: String(parsed.linkedin_text || '').trim(),\n    x_text: String(parsed.x_text || '').slice(0, 260).trim(),\n    summary: String(parsed.summary || '').trim(),\n    risk_flags: Array.isArray(parsed.risk_flags) ? parsed.risk_flags.join(',') : String(parsed.risk_flags || ''),\n    content_pillar: parsed.content_pillar || 'lesson',\n    status: 'DRAFTED'\n  }\n}];"
+      },
+      "id": "1f181065-6703-47f7-bf4e-93342c51cf54",
+      "name": "Parse Draft JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTable": "social_posts",
+        "matchColumns": "draft_id",
+        "mappingMode": "autoMapInputData"
+      },
+      "id": "5e0d1162-f1b6-4d3a-85ab-8df1372174fc",
+      "name": "Data Table - Upsert Draft",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.telegram.org/bot' + $vars.TELEGRAM_BOT_TOKEN + '/sendMessage' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: $json.telegram_chat_id || $vars.TELEGRAM_CHAT_ID, text: 'Preview para publicar\\n\\nLinkedIn:\\n' + $json.linkedin_text + '\\n\\nX:\\n' + $json.x_text + '\\n\\nResumen: ' + $json.summary, reply_markup: { inline_keyboard: [[{ text: 'Si, publicar', callback_data: 'publish:' + $json.draft_id + ':' + $json.approval_token }, { text: 'No, reescribir', callback_data: 'rewrite:' + $json.draft_id + ':' + $json.approval_token }]] }, disable_web_page_preview: true }) }}"
+      },
+      "id": "76048a98-67d7-4c50-b228-9dd71d9e1df7",
+      "name": "Telegram - Send Approval",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, draft_id: $('Data Table - Upsert Draft').first().json.draft_id, status: 'DRAFTED' } }}"
+      },
+      "id": "20bb9af8-d51d-46e2-a355-296a07002339",
+      "name": "Respond - Draft Created",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2060,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const query = $json.callback_query || {};\nconst data = String(query.data || '');\nconst [action, draft_id, approval_token] = data.split(':');\nreturn [{\n  json: {\n    callback_query_id: query.id,\n    telegram_chat_id: query.message?.chat?.id,\n    telegram_message_id: query.message?.message_id,\n    action,\n    draft_id,\n    approval_token,\n    raw_callback: JSON.stringify(query)\n  }\n}];"
+      },
+      "id": "fa52f7ad-1d67-47fa-95c8-c26897bf8fd7",
+      "name": "Parse Approval Callback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -40,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTable": "social_posts",
+        "filters": {
+          "conditions": [
+            {
+              "column": "draft_id",
+              "condition": "equals",
+              "value": "={{ $json.draft_id }}"
+            }
+          ]
+        }
+      },
+      "id": "6db90174-e153-4073-9752-e87e8abfb92d",
+      "name": "Data Table - Get Draft",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        260,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const callback = $('Parse Approval Callback').first().json;\nconst row = $json;\nif (row.approval_token && callback.approval_token !== row.approval_token) {\n  return [{ json: { ...row, ...callback, invalid_callback: true, error_message: 'Invalid approval token' } }];\n}\nreturn [{ json: { ...row, ...callback, invalid_callback: false } }];"
+      },
+      "id": "ebf7b64b-c650-4ff3-a6d3-93a1812aeb71",
+      "name": "Validate Callback Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.invalid_callback }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "invalid"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "publish",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "publish"
+            },
+            {
+              "conditions": {
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "rewrite",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "rewrite"
+            }
+          ]
+        }
+      },
+      "id": "ca087af6-bdf5-4e79-9c70-6ada6bd4a0dd",
+      "name": "Route Approval",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        860,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.telegram.org/bot' + $vars.TELEGRAM_BOT_TOKEN + '/answerCallbackQuery' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ callback_query_id: $json.callback_query_id, text: 'No pude validar esta aprobacion. No publique nada.', show_alert: true }) }}"
+      },
+      "id": "c4c702f4-4591-467c-9b38-ad8f5c0cf830",
+      "name": "Telegram - Invalid Callback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1160,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const ARG_OFFSET_MINUTES = -180;\nfunction argParts(date) {\n  const shifted = new Date(date.getTime() + ARG_OFFSET_MINUTES * 60000);\n  return {\n    year: shifted.getUTCFullYear(),\n    month: shifted.getUTCMonth(),\n    day: shifted.getUTCDate(),\n    weekday: shifted.getUTCDay()\n  };\n}\nfunction fromArg(year, month, day, hour, minute) {\n  return new Date(Date.UTC(year, month, day, hour - ARG_OFFSET_MINUTES / 60, minute, 0, 0));\n}\nconst now = new Date();\nconst hours = [11, 13, 15, 17];\nconst weekdays = [2, 3, 4];\nlet scheduled = null;\nfor (let add = 0; add < 14 && !scheduled; add += 1) {\n  const probe = new Date(now.getTime() + add * 86400000);\n  const parts = argParts(probe);\n  if (!weekdays.includes(parts.weekday)) continue;\n  for (const hour of hours) {\n    const candidate = fromArg(parts.year, parts.month, parts.day, hour, 0);\n    if (candidate > now) {\n      scheduled = candidate;\n      break;\n    }\n  }\n}\nreturn [{ json: { ...$json, status: 'APPROVED', approved_at: now.toISOString(), scheduled_for: (scheduled || now).toISOString() } }];"
+      },
+      "id": "c42c67b8-91d0-4095-9659-7fc9505ee082",
+      "name": "Compute Publishing Slot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTable": "social_posts",
+        "matchColumns": "draft_id",
+        "mappingMode": "autoMapInputData"
+      },
+      "id": "7ee6574d-e3e0-4deb-a0da-e7f886ad0e6b",
+      "name": "Data Table - Mark Approved",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1460,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $json.scheduled_for }}"
+      },
+      "id": "7d6c33bc-97d6-45da-bc09-e0a58d705deb",
+      "name": "Wait Until Scheduled Slot",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1760,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "post",
+        "operation": "create",
+        "postAs": "person",
+        "text": "={{ $json.linkedin_text }}"
+      },
+      "id": "2f57613c-e8b7-471b-9ad4-40fbe7795e48",
+      "name": "LinkedIn - Publish Personal Post",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        2060,
+        700
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "resource": "tweet",
+        "operation": "create",
+        "text": "={{ $json.x_text }}"
+      },
+      "id": "4e2db73c-14c3-48b0-bff7-99dceae7c3d5",
+      "name": "X - Publish IT Post",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        2060,
+        900
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "6d7f29a4-d4c7-4655-a73d-b4f521508141",
+      "name": "Merge Publish Responses",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2260,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const draft = $('Wait Until Scheduled Slot').first().json;\nconst linkedIn = $('LinkedIn - Publish Personal Post').first()?.json || {};\nconst x = $('X - Publish IT Post').first()?.json || {};\nconst linkedinError = Boolean(linkedIn.error || linkedIn.message?.includes?.('error'));\nconst xError = Boolean(x.error || x.message?.includes?.('error'));\nconst status = linkedinError && xError ? 'FAILED' : linkedIn.error || x.error ? 'PARTIAL_FAILURE' : 'PUBLISHED';\nreturn [{ json: { ...draft, status, linkedin_url: linkedIn.url || linkedIn.id || '', x_url: x.url || x.id || '', error_message: [linkedinError ? 'LinkedIn failed' : '', xError ? 'X failed' : ''].filter(Boolean).join(' | ') } }];"
+      },
+      "id": "f4227c09-f902-4402-a8ce-c1c364047d63",
+      "name": "Build Publish Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTable": "social_posts",
+        "matchColumns": "draft_id",
+        "mappingMode": "autoMapInputData"
+      },
+      "id": "5a82d551-8847-4420-aef8-e42b8ed6ad24",
+      "name": "Data Table - Save Publish Result",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        2780,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.telegram.org/bot' + $vars.TELEGRAM_BOT_TOKEN + '/sendMessage' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: $json.telegram_chat_id || $vars.TELEGRAM_CHAT_ID, text: 'Resultado publicacion: ' + $json.status + ($json.error_message ? '\\n' + $json.error_message : ''), disable_web_page_preview: true }) }}"
+      },
+      "id": "03776177-307d-4dcf-8012-64f36b6f3a72",
+      "name": "Telegram - Publish Result",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3080,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const attempts = Number($json.attempt_count || 0) + 1;\nif (attempts > 2) {\n  return [{ json: { ...$json, status: 'DISCARDED', attempt_count: attempts, discard_after_rewrites: true } }];\n}\nconst source = JSON.parse($json.source_payload || '{}');\nreturn [{ json: { ...source, draft_id: $json.draft_id, attempt_count: attempts, rewrite_requested: true } }];"
+      },
+      "id": "837b2c3b-87fb-4df6-a7a0-b2d443a34210",
+      "name": "Prepare Rewrite",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1160,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.discard_after_rewrites }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "ea6aee26-09b6-495c-9230-caf5149e4d58",
+      "name": "Rewrite Limit Reached?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTable": "social_posts",
+        "matchColumns": "draft_id",
+        "mappingMode": "autoMapInputData"
+      },
+      "id": "48ef7e19-7c86-4d98-ac64-23c93a3d4704",
+      "name": "Data Table - Mark Discarded",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        1160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.telegram.org/bot' + $vars.TELEGRAM_BOT_TOKEN + '/sendMessage' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ chat_id: $json.telegram_chat_id || $vars.TELEGRAM_CHAT_ID, text: 'Lo dejo como borrador y no publico nada. Ya hubo 2 reescrituras.', disable_web_page_preview: true }) }}"
+      },
+      "id": "31594f52-299b-4e78-b3d9-7fc821e4800f",
+      "name": "Telegram - Discarded",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2060,
+        1160
+      ]
+    }
+  ],
+  "connections": {
+    "Form - Daily Intake": {
+      "main": [
+        [
+          {
+            "node": "Normalize Intake",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - JSON Intake": {
+      "main": [
+        [
+          {
+            "node": "Normalize Intake",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram - Approval Callback": {
+      "main": [
+        [
+          {
+            "node": "Parse Approval Callback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Intake": {
+      "main": [
+        [
+          {
+            "node": "Has Enough Context?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Enough Context?": {
+      "main": [
+        [
+          {
+            "node": "Build OpenAI Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram - Ask More Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build OpenAI Request": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Draft Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Draft Posts": {
+      "main": [
+        [
+          {
+            "node": "Parse Draft JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Draft JSON": {
+      "main": [
+        [
+          {
+            "node": "Data Table - Upsert Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table - Upsert Draft": {
+      "main": [
+        [
+          {
+            "node": "Telegram - Send Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram - Send Approval": {
+      "main": [
+        [
+          {
+            "node": "Respond - Draft Created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Approval Callback": {
+      "main": [
+        [
+          {
+            "node": "Data Table - Get Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table - Get Draft": {
+      "main": [
+        [
+          {
+            "node": "Validate Callback Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Callback Token": {
+      "main": [
+        [
+          {
+            "node": "Route Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Approval": {
+      "main": [
+        [
+          {
+            "node": "Telegram - Invalid Callback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compute Publishing Slot",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Rewrite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Publishing Slot": {
+      "main": [
+        [
+          {
+            "node": "Data Table - Mark Approved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table - Mark Approved": {
+      "main": [
+        [
+          {
+            "node": "Wait Until Scheduled Slot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Until Scheduled Slot": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn - Publish Personal Post",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "X - Publish IT Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn - Publish Personal Post": {
+      "main": [
+        [
+          {
+            "node": "Merge Publish Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "X - Publish IT Post": {
+      "main": [
+        [
+          {
+            "node": "Merge Publish Responses",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Publish Responses": {
+      "main": [
+        [
+          {
+            "node": "Build Publish Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Publish Result": {
+      "main": [
+        [
+          {
+            "node": "Data Table - Save Publish Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table - Save Publish Result": {
+      "main": [
+        [
+          {
+            "node": "Telegram - Publish Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Rewrite": {
+      "main": [
+        [
+          {
+            "node": "Rewrite Limit Reached?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rewrite Limit Reached?": {
+      "main": [
+        [
+          {
+            "node": "Data Table - Mark Discarded",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Normalize Intake",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Table - Mark Discarded": {
+      "main": [
+        [
+          {
+            "node": "Telegram - Discarded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "timezone": "America/Argentina/Buenos_Aires",
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "social-agent"
+    }
+  ],
+  "triggerCount": 3,
+  "updatedAt": "2026-05-27T00:00:00.000Z",
+  "versionId": "daily-social-publisher-v1"
+}
