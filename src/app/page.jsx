@@ -1,15 +1,23 @@
 "use client";
 
 import { AnimatePresence, motion as Motion } from "framer-motion";
-import { ArrowUpRight, Bot, Code2, LayoutTemplate, Menu, Plus, ShoppingBag, X } from "lucide-react";
+import {
+  ArrowUpRight,
+  Bot,
+  Code2,
+  LayoutTemplate,
+  Menu,
+  Plus,
+  ShoppingBag,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { ExperiencePublicPreview } from "../components/ExperienceSection.jsx";
 import {
   contactEmail,
-  contactInstagramDisplay,
-  contactInstagramHref,
   contactPhoneDisplay,
   contactPhoneHref,
+  contactSocialLinks,
   contactWhatsappHref,
 } from "../data/contact.js";
 import { getSectorPrimaryHref, sectorHasLink, workSectors } from "../data/workSectors.js";
@@ -167,6 +175,31 @@ function Icon({ name }) {
   }
 
   return <ArrowUpRight size={18} strokeWidth={2} />;
+}
+
+function SocialLinks({ className = "" }) {
+  return (
+    <div className={`social-links ${className}`} aria-label="Redes sociales">
+      {contactSocialLinks.map((social) => {
+        return (
+          <a
+            aria-label={`Abrir ${social.label} de Thiago Maneyro`}
+            className="social-link"
+            href={social.href}
+            key={social.href}
+            rel="noreferrer"
+            target="_blank"
+            title={social.label}
+          >
+            <span className={`social-link-mark social-link-mark-${social.icon}`} aria-hidden="true">
+              {social.mark}
+            </span>
+            <span>{social.display}</span>
+          </a>
+        );
+      })}
+    </div>
+  );
 }
 
 function escapeRegExp(value) {
@@ -341,6 +374,7 @@ Detalle: ${agendaForm.brief || "Sin completar"}`,
                       Ver trabajos
                     </a>
                   </div>
+                  <SocialLinks className="hero-social-links" />
                   <div className="hero-location">Next.js · React · FastAPI · Supabase · Vercel · IA</div>
                 </div>
               </div>
@@ -515,10 +549,8 @@ Detalle: ${agendaForm.brief || "Sin completar"}`,
               <div className="agenda-direct-links">
                 <a href={contactPhoneHref}>{contactPhoneDisplay}</a>
                 <a href={`mailto:${contactEmail}`}>{contactEmail}</a>
-                <a href={contactInstagramHref} rel="noreferrer" target="_blank">
-                  {contactInstagramDisplay}
-                </a>
               </div>
+              <SocialLinks className="agenda-social-links" />
             </div>
 
             <div className="agenda-form-card animate-on-scroll">

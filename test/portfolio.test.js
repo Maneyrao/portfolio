@@ -139,6 +139,9 @@ describe("clean portfolio baseline", () => {
     assert.match(contactData, /contactEmail = "tmaneyro@gmail\.com"/);
     assert.match(contactData, /contactInstagramDisplay = "@thiagomaneyro\.dev"/);
     assert.match(contactData, /contactInstagramHref = "https:\/\/www\.instagram\.com\/thiagomaneyro\.dev\/"/);
+    assert.match(contactData, /contactLinkedinHref = "https:\/\/www\.linkedin\.com\/in\/thiago-maneyro-b7b183215\/"/);
+    assert.match(contactData, /contactXHref = "https:\/\/x\.com\/itmaneyro"/);
+    assert.match(contactData, /contactSocialLinks/);
     assert.match(contactData, /contactPhoneHref = "tel:\+5491169004497"/);
     assert.match(contactData, /contactWhatsappHref = "https:\/\/wa\.me\/5491169004497"/);
     assert.match(page, /agendaForm/);
@@ -152,11 +155,14 @@ describe("clean portfolio baseline", () => {
     assert.match(page, /Consulta inicial/);
     assert.match(page, /Agendemos una llamada simple/);
     assert.match(page, /15-20 minutos/);
-    assert.match(page, /contactInstagramHref/);
-    assert.match(page, /contactInstagramDisplay/);
+    assert.match(page, /contactSocialLinks/);
+    assert.match(page, /SocialLinks/);
+    assert.match(page, /hero-social-links/);
+    assert.match(page, /agenda-social-links/);
     assert.match(page, /Enviar por email/);
     assert.match(css, /agenda-section/);
     assert.match(css, /agenda-form/);
+    assert.match(css, /social-link/);
     assert.match(css, /floating-whatsapp/);
     assert.match(css, /#25d366/);
   });
